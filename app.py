@@ -9,81 +9,73 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- كود التصميم الجذري (CSS) ---
+# --- كود CSS القوي جداً (الحل النهائي) ---
 st.markdown("""
 <style>
-    /* 1. إعدادات الاتجاه العام */
+    /* 1. إعدادات الاتجاه العام والخطوط */
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+    
     .stApp {
         direction: rtl;
         text-align: right;
+        font-family: 'Tajawal', sans-serif;
     }
 
-    /* 2. إخفاء العناصر غير المرغوبة عند الطباعة (الحل السحري) */
-    @media print {
-        /* إخفاء الزر نفسه */
-        .print-btn-container { display: none !important; }
-        /* إخفاء شريط أدوات Streamlit العلوي */
-        header { display: none !important; }
-        /* إخفاء الفوتر */
-        footer { display: none !important; }
-        /* إخفاء أي عناصر تحكم أخرى */
-        .stButton { display: none !important; }
-        
-        /* تحسين شكل التقرير عند الطباعة */
-        .report-box { border: 1px solid #2E8B57 !important; }
-    }
-
-    /* 3. تنسيق العناوين (تمركز) */
-    h1, h2, h3, h4 {
-        text-align: center !important;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        color: #2E8B57;
-    }
-
-    /* 4. تنسيق النصوص التوضيحية (يمين) */
-    p, label, .stTextInput label, .stNumberInput label, .stSelectbox label {
-        text-align: right !important;
-    }
-    
-    /* 5. تنسيق زر الطباعة ليظهر بشكل جميل على الشاشة */
-    .print-btn {
-        background-color: #2E8B57;
-        color: white;
-        padding: 12px 24px;
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.3s;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .print-btn:hover {
-        background-color: #1e5e3a;
-        transform: scale(1.02);
-    }
-    .print-btn-container {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-        margin-bottom: 40px;
-    }
-    
-    /* 6. حاوية الشعار (توسيط إجباري) */
+    /* 2. حل مشكلة الشعار (توسيط إجباري) */
     .logo-container {
         display: flex;
         justify-content: center;
         align-items: center;
+        width: 100%;
         margin-bottom: 20px;
     }
     .logo-container img {
-        width: 160px;
-        height: auto;
+        width: 150px; /* حجم الشعار */
+        max-width: 100%;
+    }
+
+    /* 3. حل مشكلة الطباعة (الصفحة البيضاء) */
+    @media print {
+        /* إظهار المحتوى المخفي */
+        body, .stApp, .block-container {
+            visibility: visible !important;
+            height: auto !important;
+            overflow: visible !important;
+            display: block !important;
+        }
+        
+        /* إخفاء العناصر غير الضرورية */
+        header, footer, .no-print, .stButton, button {
+            display: none !important;
+        }
+
+        /* تحسين شكل التقرير في الورقة */
+        .report-box {
+            border: 2px solid #2E8B57 !important;
+            box-shadow: none !important;
+            padding: 20px !important;
+            margin: 0 !important;
+            page-break-inside: avoid;
+        }
+    }
+
+    /* 4. تنسيق النصوص */
+    h1, h2, h3, h4 { text-align: center !important; color: #2E8B57; }
+    p, label, .stMarkdown { text-align: right !important; }
+    
+    /* 5. تنسيق الحاوية (البوكس) */
+    .report-box {
+        border: 1px solid #ddd;
+        border-radius: 15px;
+        padding: 25px;
+        background-color: white;
+        margin-top: 20px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     }
 </style>
 """, unsafe_allow_html=True)
 
-# --- عرض الشعار (HTML مباشر لضمان التوسيط) ---
+# --- الشعار (HTML مباشر لضمان التوسيط) ---
 st.markdown("""
     <div class="logo-container">
         <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/logo.png">
@@ -94,7 +86,6 @@ st.markdown("""
 # --- إدخال البيانات ---
 with st.container(border=True):
     st.markdown("#### 👤 بيانات العميل")
-    
     c1, c2 = st.columns(2)
     with c1: name = st.text_input("الاسم الكريم", "زائر")
     with c2: gender = st.selectbox("الجنس", ["ذكر", "أنثى"])
@@ -106,30 +97,20 @@ with st.container(border=True):
 
     st.markdown("---")
     st.markdown("#### 🎯 النشاط والهدف")
-    
     c6, c7 = st.columns(2)
     with c6:
-        activity_map = {
-            "خامل (مكتبي)": 1.2, 
-            "نشاط خفيف (1-3 أيام)": 1.375, 
-            "متوسط (3-5 أيام)": 1.55, 
-            "عالي (6-7 أيام)": 1.725
-        }
+        activity_map = {"خامل (مكتبي)": 1.2, "نشاط خفيف": 1.375, "متوسط": 1.55, "عالي": 1.725}
         activity = st.selectbox("مستوى النشاط", list(activity_map.keys()))
     with c7:
-        goal_map = {
-            "إنقاص الوزن (تنشيف)": "loss", 
-            "محافظة على الوزن": "maintain", 
-            "زيادة الوزن (تضخيم)": "gain"
-        }
+        goal_map = {"إنقاص الوزن": "loss", "محافظة": "maintain", "زيادة الوزن": "gain"}
         goal = st.selectbox("الهدف", list(goal_map.keys()))
 
     st.write("") 
-    calc_btn = st.button("تحليل البيانات وإصدار التقرير 📊", type="primary", use_container_width=True)
+    calc_btn = st.button("تحليل البيانات 📊", type="primary", use_container_width=True)
 
 # --- الحسابات والتقرير ---
 if calc_btn:
-    # المنطق الحسابي
+    # الحسابات
     act_val = activity_map[activity]
     if gender == "ذكر":
         bmr = (9.99 * weight_val) + (6.25 * height_val) - (5 * age) + 5
@@ -161,45 +142,76 @@ if calc_btn:
     elif bmi < 30: bmi_st = "زيادة وزن"
     else: bmi_st = "سمنة"
 
-    # --- عرض التقرير ---
+    # --- التقرير (داخل حاوية HTML مخصصة للطباعة) ---
     st.markdown("---")
-    st.success("✅ تم التحليل بنجاح!")
-    
-    # حاوية التقرير
-    with st.container(border=True):
-        # ترويسة التقرير (HTML لضمان التنسيق عند الطباعة)
-        st.markdown(f"""
+    st.success("✅ تم التحليل! اضغط زر الطباعة في الأسفل.")
+
+    # نستخدم HTML و CSS مخصص للتقرير لضمان شكله عند الطباعة
+    report_html = f"""
+    <div class="report-box">
+        <div style="text-align: center;">
+            <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/logo.png" width="120">
+            <h2 style="color: #2E8B57; margin-bottom: 5px;">تقرير الحالة الغذائية</h2>
+            <p style="color: grey; font-size: 14px;">التاريخ: {datetime.date.today()}</p>
+            <h3 style="color: #333;">العميل: {name}</h3>
+        </div>
+        <hr style="border: 1px solid #eee;">
+        
+        <h4 style="text-align: right; color: #2E8B57;">1️⃣ ملخص الجسم</h4>
+        <div style="display: flex; justify-content: space-around; background: #f9f9f9; padding: 15px; border-radius: 10px;">
             <div style="text-align: center;">
-                <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/logo.png" width="100">
-                <h3>تقرير الحالة الغذائية</h3>
-                <p><strong>العميل:</strong> {name} | <strong>التاريخ:</strong> {datetime.date.today()}</p>
+                <strong>BMI</strong><br>
+                <span style="font-size: 18px; color: #2E8B57;">{bmi:.1f}</span><br>
+                <small>{bmi_st}</small>
             </div>
-            <hr>
-        """, unsafe_allow_html=True)
+            <div style="text-align: center;">
+                <strong>السعرات</strong><br>
+                <span style="font-size: 18px; color: #2E8B57;">{int(target)}</span>
+            </div>
+            <div style="text-align: center;">
+                <strong>الماء</strong><br>
+                <span style="font-size: 18px; color: #2980b9;">{round(weight_val*0.033, 1)} L</span>
+            </div>
+        </div>
 
-        st.markdown("#### 1️⃣ ملخص الجسم")
-        m1, m2, m3 = st.columns(3)
-        m1.metric("مؤشر الكتلة (BMI)", f"{bmi:.1f}", bmi_st)
-        m2.metric("السعرات اليومية", f"{int(target)}")
-        m3.metric("الماء المقترح", f"{round(weight_val*0.033, 1)} L")
-        
-        st.markdown("#### 2️⃣ احتياج الماكروز (يومياً)")
-        c_m1, c_m2, c_m3 = st.columns(3)
-        c_m1.info(f"🥩 **بروتين**\n\n{p_g}g")
-        c_m2.warning(f"🍞 **كارب**\n\n{c_g}g")
-        c_m3.error(f"🥑 **دهون**\n\n{f_g}g")
-        
-        st.markdown("#### 3️⃣ توصيات الخبراء")
-        st.markdown(f"لتحقيق هدفك **({goal})** ننصح باستخدام:")
-        st.success(f"💊 **{rec_supps}**")
-        
-        st.caption("© 2026 First Nutrition Expert System")
+        <h4 style="text-align: right; color: #2E8B57;">2️⃣ احتياج الماكروز (يومياً)</h4>
+        <div style="display: flex; gap: 10px;">
+            <div style="flex: 1; text-align: center; border: 1px solid #ffcccc; padding: 10px; border-radius: 8px;">
+                🥩 بروتين<br><b>{p_g}g</b>
+            </div>
+            <div style="flex: 1; text-align: center; border: 1px solid #ffffcc; padding: 10px; border-radius: 8px;">
+                🍞 كارب<br><b>{c_g}g</b>
+            </div>
+            <div style="flex: 1; text-align: center; border: 1px solid #ccffcc; padding: 10px; border-radius: 8px;">
+                🥑 دهون<br><b>{f_g}g</b>
+            </div>
+        </div>
 
-    # --- زر الطباعة (مخفي عند الطباعة) ---
+        <h4 style="text-align: right; color: #2E8B57;">3️⃣ التوصيات</h4>
+        <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; text-align: center;">
+            <p style="margin: 0; font-weight: bold;">لتحقيق هدف ({goal}) ننصح باستخدام:</p>
+            <p style="margin: 5px 0; color: #2E8B57; font-size: 18px;">💊 {rec_supps}</p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; font-size: 12px; color: #aaa;">
+            © 2026 First Nutrition System
+        </div>
+    </div>
+    """
+    st.markdown(report_html, unsafe_allow_html=True)
+
+    # --- زر الطباعة (الجافاسكريبت) ---
     components.html(
         """
-        <div class="print-btn-container">
-            <button onclick="window.print()" class="print-btn">
+        <script>
+        function printPage() {
+            window.print();
+        }
+        </script>
+        <div class="no-print" style="text-align: center; margin-top: 20px;">
+            <button onclick="printPage()" style="
+                background-color: #2E8B57; color: white; border: none; padding: 12px 25px;
+                font-size: 16px; border-radius: 5px; cursor: pointer; font-weight: bold;">
                 🖨️ طباعة التقرير / حفظ كـ PDF
             </button>
         </div>
