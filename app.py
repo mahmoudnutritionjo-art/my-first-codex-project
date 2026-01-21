@@ -1,15 +1,82 @@
 import streamlit as st
 
-# إعدادات الصفحة
-st.set_page_config(page_title="حاسبة معدل الأيض (BMR)", page_icon="💪", layout="centered")
+# إعدادات الصفحة العامة
+st.set_page_config(
+    page_title="First Nutrition Calculator",
+    page_icon="🍏",
+    layout="centered"
+)
 
-# عنوان التطبيق وتوضيح بسيط
-st.title("نظام حساب السعرات الحرارية - المبيعات")
-st.write("أدخل بيانات العميل لحساب معدل الأيض الأساسي (BMR) بدقة.")
+# --- CSS لتحسين التصميم وجعله عربي (من اليمين لليسار) ---
+st.markdown("""
+<style>
+    /* تغيير اتجاه النصوص للعربية */
+    .stApp {
+        direction: rtl;
+        text-align: right;
+    }
+    
+    /* تنسيق العناوين */
+    h1, h2, h3 {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #2E8B57; /* لون أخضر مناسب للتغذية */
+        text-align: center;
+    }
+    
+    /* توسيط الشعار */
+    div[data-testid="stImage"] {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 50%;
+    }
+    
+    /* تحسين شكل النتائج */
+    .metric-box {
+        background-color: #f0f8f0;
+        border: 2px solid #2E8B57;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    /* تنسيق الأزرار */
+    .stButton>button {
+        width: 100%;
+        background-color: #2E8B57;
+        color: white;
+        font-size: 18px;
+        border-radius: 8px;
+        height: 50px;
+    }
+    
+    /* تنسيق روابط السوشيال ميديا */
+    .social-icons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    .social-icons img {
+        width: 40px;
+        transition: transform 0.2s;
+    }
+    .social-icons img:hover {
+        transform: scale(1.1);
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# --- 1. قسم الشعار (Logo) ---
+st.image("https://www.firstnutrition.com/wp-content/uploads/2026/01/logo.png", use_container_width=True)
+
+# --- 2. العنوان ---
+st.title("نظام حساب السعرات الحرارية")
+st.markdown("<h4 style='text-align: center; color: gray;'>أدخل بيانات العميل بدقة للحصول على النتائج</h4>", unsafe_allow_html=True)
 st.write("---")
 
-# 1. إدخال البيانات
-# تقسيم الشاشة لعمودين لترتيب البيانات
+# --- 3. إدخال البيانات (مقسمة لعمودين بشكل مرتب) ---
 col1, col2 = st.columns(2)
 
 with col1:
@@ -20,39 +87,70 @@ with col2:
     weight = st.number_input("الوزن (كغ - KG)", min_value=30.0, max_value=300.0, value=70.0)
     height = st.number_input("الطول (سم - CM)", min_value=100.0, max_value=250.0, value=170.0)
 
-# زر الحساب
-if st.button("احسب BMR للعميل"):
+# مسافة فاصلة
+st.write("") 
+
+# --- 4. زر الحساب والمنطق البرمجي ---
+if st.button("احسب احتياج العميل (BMR)"):
     
-    # 2. تعريف المتغيرات للحساب
+    # تعريف المتغيرات
     W = weight
     H = height
     A = age
     
-    # 3. معادلة Harris-Benedict (القديمة)
+    # معادلة Harris-Benedict
     if gender == "ذكر":
         bmr_harris = 66.5 + (13.75 * W) + (5 * H) - (6.75 * A)
     else:
         bmr_harris = 655.1 + (9.563 * W) + (1.85 * H) - (4.676 * A)
 
-    # 4. معادلة Mifflin-St Jeor (الأكثر دقة)
+    # معادلة Mifflin-St Jeor (الأدق)
     if gender == "ذكر":
         bmr_mifflin = (9.99 * W) + (6.25 * H) - (5 * A) + 5
     else:
         bmr_mifflin = (9.99 * W) + (6.25 * H) - (5 * A) - 161
 
-    # 5. عرض النتائج
-    st.success("تم الحساب بنجاح!")
-    
+    # --- 5. عرض النتائج بشكل جذاب ---
     st.write("---")
     
-    # عرض النتيجة الأكثر دقة بشكل بارز
-    st.subheader("📊 النتيجة المعتمدة (الأكثر دقة)")
-    st.info(f"**{round(bmr_mifflin)} سعرة حرارية / يوم** (حسب معادلة Mifflin-St Jeor)")
+    # النتيجة الرئيسية داخل صندوق مميز
+    st.markdown(f"""
+    <div class="metric-box">
+        <h3 style="margin-bottom: 0;">النتيجة المعتمدة (الأكثر دقة)</h3>
+        <p style="color: #555;">Mifflin-St Jeor Equation</p>
+        <h1 style="color: #2E8B57; font-size: 50px; margin: 0;">{round(bmr_mifflin)}</h1>
+        <p style="font-weight: bold;">سعرة حرارية / يوم</p>
+    </div>
+    """, unsafe_allow_html=True)
 
-    # عرض النتيجة الأخرى للمقارنة
-    with st.expander("عرض النتيجة حسب معادلة Harris-Benedict"):
-        st.write(f"النتيجة: **{round(bmr_harris)}** سعرة حرارية / يوم")
-        st.caption("ملاحظة: معادلة Harris-Benedict قديمة، ويفضل الاعتماد على النتيجة الأولى.")
+    # نتيجة المقارنة (اختياري)
+    with st.expander("اضغط هنا لمشاهدة النتيجة حسب معادلة Harris-Benedict"):
+        st.info(f"النتيجة: **{round(bmr_harris)}** سعرة حرارية / يوم")
 
-    st.write("---")
-    st.caption("تم تطوير هذا النظام لفريق المبيعات - النسخة 1.0")
+# --- 6. تذييل الصفحة (Footer) وروابط السوشيال ميديا ---
+st.write("---")
+st.markdown("<h5 style='text-align: center;'>تابعونا على منصات التواصل الاجتماعي</h5>", unsafe_allow_html=True)
+
+# روابط الصور والروابط المقصودة
+social_html = """
+<div class="social-icons">
+    <a href="https://www.facebook.com/firstnutritionjordan/" target="_blank">
+        <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/firstnutritionjordan-1-FB-.png" alt="Facebook">
+    </a>
+    <a href="https://www.instagram.com/firstnutritionjo/" target="_blank">
+        <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/firstnutritionjordan-2-INSTA.png" alt="Instagram">
+    </a>
+    <a href="https://www.youtube.com/@FirstNutritionofficial" target="_blank">
+        <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/firstnutritionjordan-3YOUTUBE-.png" alt="YouTube">
+    </a>
+    <a href="https://www.linkedin.com/company/first-nutrition/" target="_blank">
+        <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/firstnutritionjordan-4in-.png" alt="LinkedIn">
+    </a>
+    <a href="https://www.firstnutrition.com" target="_blank">
+        <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/firstnutritionjordan-5-WEB-1.png" alt="Website">
+    </a>
+</div>
+"""
+st.markdown(social_html, unsafe_allow_html=True)
+
+st.markdown("<p style='text-align: center; margin-top: 20px; color: grey; font-size: 12px;'>© 2026 First Nutrition - Sales Team App</p>", unsafe_allow_html=True)
