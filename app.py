@@ -1,6 +1,7 @@
 import streamlit as st
 import datetime
 import streamlit.components.v1 as components
+import textwrap
 
 # --- 1. إعدادات الصفحة ---
 st.set_page_config(
@@ -9,7 +10,7 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- 2. كود التصميم والطباعة (CSS) ---
+# --- 2. التصميم (CSS) ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
@@ -20,6 +21,7 @@ st.markdown("""
         font-family: 'Tajawal', sans-serif;
     }
 
+    /* تنسيق الشعار */
     .logo-container {
         display: flex;
         justify-content: center;
@@ -49,6 +51,7 @@ st.markdown("""
         }
     }
 
+    /* صندوق التقرير */
     .report-box {
         border: 1px solid #ddd;
         border-radius: 15px;
@@ -106,23 +109,21 @@ with st.container(border=True):
     st.write("") 
     calc_btn = st.button("تحليل البيانات 📊", type="primary", use_container_width=True)
 
-# --- 5. العمليات الحسابية (مع إضافة TEF) ---
+# --- 5. العمليات الحسابية ---
 if calc_btn:
-    # 1. حساب BMR
+    # BMR
     act_val = activity_map[activity]
     if gender == "ذكر":
         bmr = (9.99 * weight_val) + (6.25 * height_val) - (5 * age) + 5
     else:
         bmr = (9.99 * weight_val) + (6.25 * height_val) - (5 * age) - 161
         
-    # 2. حساب السعرات حسب النشاط
+    # TDEE + TEF Calculation
     activity_calories = bmr * act_val
-    
-    # 3. إضافة Thermic Effect of Food (10%)
-    tef = activity_calories * 0.10
-    total_tdee = activity_calories + tef  # المجموع الكلي الدقيق
+    tef = activity_calories * 0.10  # 10% Thermic Effect
+    total_tdee = activity_calories + tef  # المجموع النهائي الدقيق
 
-    # 4. تعديل السعرات حسب الهدف
+    # Target Calories
     if goal_map[goal] == "loss":
         target = total_tdee - 500
         p_r, c_r, f_r = 0.40, 0.30, 0.30
@@ -146,62 +147,64 @@ if calc_btn:
     elif bmi < 30: bmi_st = "زيادة وزن"
     else: bmi_st = "سمنة"
 
-    # --- 6. عرض التقرير ---
+    # --- 6. عرض التقرير (مع حل مشكلة المسافات) ---
     st.markdown("---")
     st.success("✅ تم التحليل بدقة (شاملاً التأثير الحراري للطعام TEF)")
 
-    report_html = f"""
-<div class="report-box">
-    <div style="text-align: center;">
-        <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/logo.png" width="120">
-        <h2 style="color: #2E8B57; margin: 10px 0;">تقرير الحالة الغذائية</h2>
-        <p style="color: grey;">التاريخ: {datetime.date.today()}</p>
-        <h3 style="color: #333;">العميل: {name}</h3>
-    </div>
-    <hr style="border: 1px solid #eee;">
-    
-    <h4 style="text-align: right; color: #2E8B57;">1️⃣ ملخص الجسم</h4>
-    <div class="stat-row">
-        <div class="stat-item">
-            <strong>BMI</strong><br>
-            <span style="font-size: 18px; color: #2E8B57;">{bmi:.1f}</span><br>
-            <small>{bmi_st}</small>
-        </div>
-        <div class="stat-item">
-            <strong>الاحتياج اليومي</strong><br>
-            <span style="font-size: 18px; color: #2E8B57;">{int(target)}</span><br>
-            <small>سعرة (شامل TEF)</small>
-        </div>
-        <div class="stat-item">
-            <strong>الماء</strong><br>
-            <span style="font-size: 18px; color: #2980b9;">{round(weight_val*0.033, 1)} L</span>
-        </div>
-    </div>
+    # نستخدم textwrap.dedent لإزالة أي مسافات بادئة تسبب المشكلة
+    report_html = textwrap.dedent(f"""
+        <div class="report-box">
+            <div style="text-align: center;">
+                <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/logo.png" width="120">
+                <h2 style="color: #2E8B57; margin: 10px 0;">تقرير الحالة الغذائية</h2>
+                <p style="color: grey;">التاريخ: {datetime.date.today()}</p>
+                <h3 style="color: #333;">العميل: {name}</h3>
+            </div>
+            <hr style="border: 1px solid #eee;">
+            
+            <h4 style="text-align: right; color: #2E8B57;">1️⃣ ملخص الجسم</h4>
+            <div class="stat-row">
+                <div class="stat-item">
+                    <strong>BMI</strong><br>
+                    <span style="font-size: 18px; color: #2E8B57;">{bmi:.1f}</span><br>
+                    <small>{bmi_st}</small>
+                </div>
+                <div class="stat-item">
+                    <strong>الاحتياج اليومي</strong><br>
+                    <span style="font-size: 18px; color: #2E8B57;">{int(target)}</span><br>
+                    <small>سعرة (شامل TEF)</small>
+                </div>
+                <div class="stat-item">
+                    <strong>الماء</strong><br>
+                    <span style="font-size: 18px; color: #2980b9;">{round(weight_val*0.033, 1)} L</span>
+                </div>
+            </div>
 
-    <h4 style="text-align: right; color: #2E8B57;">2️⃣ احتياج الماكروز (يومياً)</h4>
-    <div class="stat-row">
-        <div class="stat-item" style="border: 1px solid #ffcccc; border-radius: 8px;">
-            🥩 بروتين<br><b>{p_g}g</b>
-        </div>
-        <div class="stat-item" style="border: 1px solid #ffffcc; border-radius: 8px;">
-            🍞 كارب<br><b>{c_g}g</b>
-        </div>
-        <div class="stat-item" style="border: 1px solid #ccffcc; border-radius: 8px;">
-            🥑 دهون<br><b>{f_g}g</b>
-        </div>
-    </div>
+            <h4 style="text-align: right; color: #2E8B57;">2️⃣ احتياج الماكروز (يومياً)</h4>
+            <div class="stat-row">
+                <div class="stat-item" style="border: 1px solid #ffcccc; border-radius: 8px;">
+                    🥩 بروتين<br><b>{p_g}g</b>
+                </div>
+                <div class="stat-item" style="border: 1px solid #ffffcc; border-radius: 8px;">
+                    🍞 كارب<br><b>{c_g}g</b>
+                </div>
+                <div class="stat-item" style="border: 1px solid #ccffcc; border-radius: 8px;">
+                    🥑 دهون<br><b>{f_g}g</b>
+                </div>
+            </div>
 
-    <h4 style="text-align: right; color: #2E8B57;">3️⃣ التوصيات</h4>
-    <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; text-align: center;">
-        <p style="margin: 0; font-weight: bold;">لتحقيق هدف ({goal}) ننصح باستخدام:</p>
-        <p style="margin: 5px 0; color: #2E8B57; font-size: 18px;">💊 {rec_supps}</p>
-    </div>
+            <h4 style="text-align: right; color: #2E8B57;">3️⃣ التوصيات</h4>
+            <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; text-align: center;">
+                <p style="margin: 0; font-weight: bold;">لتحقيق هدف ({goal}) ننصح باستخدام:</p>
+                <p style="margin: 5px 0; color: #2E8B57; font-size: 18px;">💊 {rec_supps}</p>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px; font-size: 12px; color: #aaa;">
+                © 2026 First Nutrition System
+            </div>
+        </div>
+    """)
     
-    <div style="text-align: center; margin-top: 30px; font-size: 12px; color: #aaa;">
-        © 2026 First Nutrition System
-    </div>
-</div>
-"""
     st.markdown(report_html, unsafe_allow_html=True)
 
     # --- 7. زر الطباعة ---
