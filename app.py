@@ -1,156 +1,168 @@
 import streamlit as st
 
-# إعدادات الصفحة العامة
+# --- إعدادات الصفحة ---
 st.set_page_config(
-    page_title="First Nutrition Calculator",
-    page_icon="🍏",
+    page_title="First Nutrition Pro",
+    page_icon="💪",
     layout="centered"
 )
 
-# --- CSS لتحسين التصميم وجعله عربي (من اليمين لليسار) ---
+# --- CSS للتصميم الاحترافي واللغة العربية ---
 st.markdown("""
 <style>
-    /* تغيير اتجاه النصوص للعربية */
-    .stApp {
-        direction: rtl;
-        text-align: right;
-    }
+    .stApp { direction: rtl; text-align: right; }
+    h1, h2, h3 { color: #2E8B57; font-family: 'Segoe UI', sans-serif; text-align: center; }
     
-    /* تنسيق العناوين */
-    h1, h2, h3 {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        color: #2E8B57; /* لون أخضر مناسب للتغذية */
-        text-align: center;
-    }
-    
-    /* توسيط الشعار */
-    div[data-testid="stImage"] {
-        display: block;
-        margin-left: auto;
-        margin-right: auto;
-        width: 50%;
-    }
-    
-    /* تحسين شكل النتائج */
-    .metric-box {
-        background-color: #f0f8f0;
+    /* تنسيق بطاقات النتائج */
+    .result-card {
+        background-color: #f8fff8;
         border: 2px solid #2E8B57;
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 20px;
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
+    .big-number { font-size: 36px; font-weight: bold; color: #2E8B57; }
+    .label-text { font-size: 16px; color: #555; font-weight: bold; }
     
-    /* تنسيق الأزرار */
-    .stButton>button {
-        width: 100%;
-        background-color: #2E8B57;
-        color: white;
-        font-size: 18px;
+    /* تنسيق الماكروز */
+    .macro-box {
+        background-color: white;
+        border: 1px solid #ddd;
         border-radius: 8px;
-        height: 50px;
+        padding: 10px;
+        text-align: center;
     }
     
-    /* تنسيق روابط السوشيال ميديا */
-    .social-icons {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
+    /* تنسيق التوصيات */
+    .rec-box {
+        background-color: #fff3cd;
+        border-left: 5px solid #ffc107;
+        padding: 15px;
+        border-radius: 5px;
         margin-top: 20px;
     }
-    .social-icons img {
-        width: 40px;
-        transition: transform 0.2s;
-    }
-    .social-icons img:hover {
-        transform: scale(1.1);
-    }
+    
+    .stButton>button { background-color: #2E8B57; color: white; height: 50px; font-size: 18px; width: 100%; }
 </style>
 """, unsafe_allow_html=True)
 
-# --- 1. قسم الشعار (Logo) ---
+# --- الشعار ---
 st.image("https://www.firstnutrition.com/wp-content/uploads/2026/01/logo.png", use_container_width=True)
+st.title("نظام تحليل الجسم الذكي")
 
-# --- 2. العنوان ---
-st.title("نظام حساب السعرات الحرارية")
-st.markdown("<h4 style='text-align: center; color: gray;'>أدخل بيانات العميل بدقة للحصول على النتائج</h4>", unsafe_allow_html=True)
-st.write("---")
-
-# --- 3. إدخال البيانات (مقسمة لعمودين بشكل مرتب) ---
+# --- 1. إدخال البيانات الأساسية ---
+st.subheader("1️⃣ بيانات العميل")
 col1, col2 = st.columns(2)
-
 with col1:
     gender = st.selectbox("الجنس", ["ذكر", "أنثى"])
-    age = st.number_input("العمر (بالسنوات)", min_value=10, max_value=120, value=30)
-
+    age = st.number_input("العمر", 10, 100, 30)
 with col2:
-    weight = st.number_input("الوزن (كغ - KG)", min_value=30.0, max_value=300.0, value=70.0)
-    height = st.number_input("الطول (سم - CM)", min_value=100.0, max_value=250.0, value=170.0)
+    weight = st.number_input("الوزن (KG)", 30.0, 200.0, 80.0)
+    height = st.number_input("الطول (CM)", 100.0, 250.0, 180.0)
 
-# مسافة فاصلة
-st.write("") 
+# --- 2. مستوى النشاط والهدف (الإضافات الجديدة) ---
+st.subheader("2️⃣ نمط الحياة والهدف")
+activity_options = {
+    "خامل (عمل مكتبي، لا رياضة)": 1.2,
+    "نشاط خفيف (رياضة 1-3 أيام)": 1.375,
+    "نشاط متوسط (رياضة 3-5 أيام)": 1.55,
+    "نشيط جداً (رياضة 6-7 أيام)": 1.725,
+    "رياضي محترف (تمارين قاسية يومياً)": 1.9
+}
+activity = st.selectbox("مستوى النشاط اليومي", list(activity_options.keys()))
 
-# --- 4. زر الحساب والمنطق البرمجي ---
-if st.button("احسب احتياج العميل (BMR)"):
+goal_options = {
+    "إنقاص الوزن (تنشيف)": "loss",
+    "محافظة على الوزن": "maintain",
+    "زيادة الوزن (تضخيم)": "gain"
+}
+goal = st.selectbox("الهدف من البرنامج", list(goal_options.keys()))
+
+# --- زر التحليل ---
+if st.button("تحليل احتياج العميل وإصدار التقرير 📊"):
     
-    # تعريف المتغيرات
-    W = weight
-    H = height
-    A = age
-    
-    # معادلة Harris-Benedict
+    # 1. حساب BMR (Mifflin-St Jeor)
     if gender == "ذكر":
-        bmr_harris = 66.5 + (13.75 * W) + (5 * H) - (6.75 * A)
+        bmr = (9.99 * weight) + (6.25 * height) - (5 * age) + 5
     else:
-        bmr_harris = 655.1 + (9.563 * W) + (1.85 * H) - (4.676 * A)
+        bmr = (9.99 * weight) + (6.25 * height) - (5 * age) - 161
 
-    # معادلة Mifflin-St Jeor (الأدق)
-    if gender == "ذكر":
-        bmr_mifflin = (9.99 * W) + (6.25 * H) - (5 * A) + 5
+    # 2. حساب TDEE (السعرات للمحافظة)
+    tdee = bmr * activity_options[activity]
+
+    # 3. حساب سعرات الهدف
+    target_calories = tdee
+    if goal_options[goal] == "loss":
+        target_calories = tdee - 500
+        macros_ratio = {"p": 0.40, "f": 0.30, "c": 0.30} # بروتين عالي للتنشيف
+        rec_text = "نوصي بمنتجات حرق الدهون + بروتين المعزول (Iso) للحفاظ على العضلات."
+        rec_products = ["ISO-100 / Whey Isolate", "L-Carnitine / Fat Burner", "Multivitamin"]
+    elif goal_options[goal] == "gain":
+        target_calories = tdee + 500
+        macros_ratio = {"p": 0.30, "f": 0.20, "c": 0.50} # كارب عالي للتضخيم
+        rec_text = "نوصي بمنتجات زيادة الوزن (Gainer) والكرياتين لزيادة القوة والحجم."
+        rec_products = ["Mass Gainer", "Creatine Monohydrate", "Pre-Workout"]
     else:
-        bmr_mifflin = (9.99 * W) + (6.25 * H) - (5 * A) - 161
+        macros_ratio = {"p": 0.30, "f": 0.30, "c": 0.40} # متوازن
+        rec_text = "نوصي بالواي بروتين والملتي فيتامين للصحة العامة والاستشفاء."
+        rec_products = ["Whey Protein Gold", "Omega 3", "Daily Vitamins"]
 
-    # --- 5. عرض النتائج بشكل جذاب ---
-    st.write("---")
+    # 4. حساب الماكروز (الجرامات)
+    protein_g = (target_calories * macros_ratio["p"]) / 4
+    fat_g = (target_calories * macros_ratio["f"]) / 9
+    carbs_g = (target_calories * macros_ratio["c"]) / 4
+
+    # --- عرض النتائج ---
+    st.markdown("---")
+    st.header("📋 تقرير First Nutrition")
     
-    # النتيجة الرئيسية داخل صندوق مميز
+    # بطاقة السعرات الرئيسية
     st.markdown(f"""
-    <div class="metric-box">
-        <h3 style="margin-bottom: 0;">النتيجة المعتمدة (الأكثر دقة)</h3>
-        <p style="color: #555;">Mifflin-St Jeor Equation</p>
-        <h1 style="color: #2E8B57; font-size: 50px; margin: 0;">{round(bmr_mifflin)}</h1>
-        <p style="font-weight: bold;">سعرة حرارية / يوم</p>
+    <div class="result-card">
+        <p class="label-text">احتياجك اليومي لتحقيق هدفك ({goal})</p>
+        <div class="big-number">{int(target_calories)} سعرة حرارية</div>
+        <p style="font-size: 12px; color: grey;">(معدل الأيض الأساسي BMR: {int(bmr)})</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # نتيجة المقارنة (اختياري)
-    with st.expander("اضغط هنا لمشاهدة النتيجة حسب معادلة Harris-Benedict"):
-        st.info(f"النتيجة: **{round(bmr_harris)}** سعرة حرارية / يوم")
+    # عرض الماكروز
+    st.subheader("🍽️ تقسيم العناصر الغذائية (الماكروز)")
+    m1, m2, m3 = st.columns(3)
+    with m1:
+        st.markdown(f"""<div class="macro-box">🥩 بروتين<br><b>{int(protein_g)}g</b></div>""", unsafe_allow_html=True)
+    with m2:
+        st.markdown(f"""<div class="macro-box">🍞 كارب<br><b>{int(carbs_g)}g</b></div>""", unsafe_allow_html=True)
+    with m3:
+        st.markdown(f"""<div class="macro-box">🥑 دهون<br><b>{int(fat_g)}g</b></div>""", unsafe_allow_html=True)
 
-# --- 6. تذييل الصفحة (Footer) وروابط السوشيال ميديا ---
-st.write("---")
-st.markdown("<h5 style='text-align: center;'>تابعونا على منصات التواصل الاجتماعي</h5>", unsafe_allow_html=True)
+    # --- التوصيات الذكية (للبيع) ---
+    st.markdown("---")
+    st.subheader("💊 توصيات الخبراء (Supplements)")
+    
+    st.info(f"💡 نصيحة: {rec_text}")
+    
+    st.write("المنتجات المقترحة لك:")
+    r1, r2, r3 = st.columns(3)
+    for i, prod in enumerate(rec_products):
+        if i == 0: r1.success(f"✅ {prod}")
+        if i == 1: r2.success(f"✅ {prod}")
+        if i == 2: r3.success(f"✅ {prod}")
 
-# روابط الصور والروابط المقصودة
+    # ملاحظة للطباعة
+    st.markdown("---")
+    st.caption("يمكنك طباعة هذا التقرير أو حفظه كـ PDF من خيارات المتصفح (Print -> Save as PDF).")
+
+# --- الفوتر ---
+st.markdown("---")
+# Social Media Links (نفس الروابط السابقة)
 social_html = """
-<div class="social-icons">
-    <a href="https://www.facebook.com/firstnutritionjordan/" target="_blank">
-        <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/firstnutritionjordan-1-FB-.png" alt="Facebook">
-    </a>
-    <a href="https://www.instagram.com/firstnutritionjo/" target="_blank">
-        <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/firstnutritionjordan-2-INSTA.png" alt="Instagram">
-    </a>
-    <a href="https://www.youtube.com/@FirstNutritionofficial" target="_blank">
-        <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/firstnutritionjordan-3YOUTUBE-.png" alt="YouTube">
-    </a>
-    <a href="https://www.linkedin.com/company/first-nutrition/" target="_blank">
-        <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/firstnutritionjordan-4in-.png" alt="LinkedIn">
-    </a>
-    <a href="https://www.firstnutrition.com" target="_blank">
-        <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/firstnutritionjordan-5-WEB-1.png" alt="Website">
-    </a>
+<div style="display: flex; justify-content: center; gap: 10px;">
+    <a href="https://www.facebook.com/firstnutritionjordan/" target="_blank">فيسبوك</a> | 
+    <a href="https://www.instagram.com/firstnutritionjo/" target="_blank">انستقرام</a> | 
+    <a href="https://www.firstnutrition.com" target="_blank">الموقع الرسمي</a>
 </div>
+<p style='text-align: center; color: grey; font-size: 12px; margin-top: 10px;'>© 2026 First Nutrition</p>
 """
 st.markdown(social_html, unsafe_allow_html=True)
-
-st.markdown("<p style='text-align: center; margin-top: 20px; color: grey; font-size: 12px;'>© 2026 First Nutrition - Sales Team App</p>", unsafe_allow_html=True)
