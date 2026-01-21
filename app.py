@@ -1,7 +1,6 @@
 import streamlit as st
 import datetime
 import streamlit.components.v1 as components
-import textwrap
 
 # --- 1. إعدادات الصفحة ---
 st.set_page_config(
@@ -11,7 +10,8 @@ st.set_page_config(
 )
 
 # --- 2. التصميم (CSS) ---
-st.markdown("""
+# ملاحظة: تم وضع CSS في متغير لضمان عدم تكسر الكود
+css_style = """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
     
@@ -21,7 +21,6 @@ st.markdown("""
         font-family: 'Tajawal', sans-serif;
     }
 
-    /* تنسيق الشعار */
     .logo-container {
         display: flex;
         justify-content: center;
@@ -51,7 +50,6 @@ st.markdown("""
         }
     }
 
-    /* صندوق التقرير */
     .report-box {
         border: 1px solid #ddd;
         border-radius: 15px;
@@ -74,7 +72,8 @@ st.markdown("""
     }
     .stat-item { text-align: center; flex: 1; }
 </style>
-""", unsafe_allow_html=True)
+"""
+st.markdown(css_style, unsafe_allow_html=True)
 
 # --- 3. الشعار ---
 st.markdown("""
@@ -121,7 +120,7 @@ if calc_btn:
     # TDEE + TEF Calculation
     activity_calories = bmr * act_val
     tef = activity_calories * 0.10  # 10% Thermic Effect
-    total_tdee = activity_calories + tef  # المجموع النهائي الدقيق
+    total_tdee = activity_calories + tef
 
     # Target Calories
     if goal_map[goal] == "loss":
@@ -147,65 +146,68 @@ if calc_btn:
     elif bmi < 30: bmi_st = "زيادة وزن"
     else: bmi_st = "سمنة"
 
-    # --- 6. عرض التقرير (مع حل مشكلة المسافات) ---
+    # --- 6. عرض التقرير (الحل النهائي) ---
     st.markdown("---")
-    st.success("✅ تم التحليل بدقة (شاملاً التأثير الحراري للطعام TEF)")
+    st.success("✅ تم التحليل بدقة (شاملاً TEF)")
 
-    # نستخدم textwrap.dedent لإزالة أي مسافات بادئة تسبب المشكلة
-    report_html = textwrap.dedent(f"""
-        <div class="report-box">
-            <div style="text-align: center;">
-                <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/logo.png" width="120">
-                <h2 style="color: #2E8B57; margin: 10px 0;">تقرير الحالة الغذائية</h2>
-                <p style="color: grey;">التاريخ: {datetime.date.today()}</p>
-                <h3 style="color: #333;">العميل: {name}</h3>
+    # قمنا بدمج كود HTML في سطر واحد لمتغيرات النصوص لتجنب مشكلة المسافات
+    # هذه الطريقة تمنع ظهور الكود كنص عادي
+    
+    html_content = f"""
+    <div class="report-box">
+        <div style="text-align: center;">
+            <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/logo.png" width="120">
+            <h2 style="color: #2E8B57; margin: 10px 0;">تقرير الحالة الغذائية</h2>
+            <p style="color: grey;">التاريخ: {datetime.date.today()}</p>
+            <h3 style="color: #333;">العميل: {name}</h3>
+        </div>
+        <hr style="border: 1px solid #eee;">
+        
+        <h4 style="text-align: right; color: #2E8B57;">1️⃣ ملخص الجسم</h4>
+        <div class="stat-row">
+            <div class="stat-item">
+                <strong>BMI</strong><br>
+                <span style="font-size: 18px; color: #2E8B57;">{bmi:.1f}</span><br>
+                <small>{bmi_st}</small>
             </div>
-            <hr style="border: 1px solid #eee;">
-            
-            <h4 style="text-align: right; color: #2E8B57;">1️⃣ ملخص الجسم</h4>
-            <div class="stat-row">
-                <div class="stat-item">
-                    <strong>BMI</strong><br>
-                    <span style="font-size: 18px; color: #2E8B57;">{bmi:.1f}</span><br>
-                    <small>{bmi_st}</small>
-                </div>
-                <div class="stat-item">
-                    <strong>الاحتياج اليومي</strong><br>
-                    <span style="font-size: 18px; color: #2E8B57;">{int(target)}</span><br>
-                    <small>سعرة (شامل TEF)</small>
-                </div>
-                <div class="stat-item">
-                    <strong>الماء</strong><br>
-                    <span style="font-size: 18px; color: #2980b9;">{round(weight_val*0.033, 1)} L</span>
-                </div>
+            <div class="stat-item">
+                <strong>الاحتياج اليومي</strong><br>
+                <span style="font-size: 18px; color: #2E8B57;">{int(target)}</span><br>
+                <small>سعرة (شامل TEF)</small>
             </div>
-
-            <h4 style="text-align: right; color: #2E8B57;">2️⃣ احتياج الماكروز (يومياً)</h4>
-            <div class="stat-row">
-                <div class="stat-item" style="border: 1px solid #ffcccc; border-radius: 8px;">
-                    🥩 بروتين<br><b>{p_g}g</b>
-                </div>
-                <div class="stat-item" style="border: 1px solid #ffffcc; border-radius: 8px;">
-                    🍞 كارب<br><b>{c_g}g</b>
-                </div>
-                <div class="stat-item" style="border: 1px solid #ccffcc; border-radius: 8px;">
-                    🥑 دهون<br><b>{f_g}g</b>
-                </div>
-            </div>
-
-            <h4 style="text-align: right; color: #2E8B57;">3️⃣ التوصيات</h4>
-            <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; text-align: center;">
-                <p style="margin: 0; font-weight: bold;">لتحقيق هدف ({goal}) ننصح باستخدام:</p>
-                <p style="margin: 5px 0; color: #2E8B57; font-size: 18px;">💊 {rec_supps}</p>
-            </div>
-            
-            <div style="text-align: center; margin-top: 30px; font-size: 12px; color: #aaa;">
-                © 2026 First Nutrition System
+            <div class="stat-item">
+                <strong>الماء</strong><br>
+                <span style="font-size: 18px; color: #2980b9;">{round(weight_val*0.033, 1)} L</span>
             </div>
         </div>
-    """)
+
+        <h4 style="text-align: right; color: #2E8B57;">2️⃣ احتياج الماكروز (يومياً)</h4>
+        <div class="stat-row">
+            <div class="stat-item" style="border: 1px solid #ffcccc; border-radius: 8px;">
+                🥩 بروتين<br><b>{p_g}g</b>
+            </div>
+            <div class="stat-item" style="border: 1px solid #ffffcc; border-radius: 8px;">
+                🍞 كارب<br><b>{c_g}g</b>
+            </div>
+            <div class="stat-item" style="border: 1px solid #ccffcc; border-radius: 8px;">
+                🥑 دهون<br><b>{f_g}g</b>
+            </div>
+        </div>
+
+        <h4 style="text-align: right; color: #2E8B57;">3️⃣ التوصيات</h4>
+        <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; text-align: center;">
+            <p style="margin: 0; font-weight: bold;">لتحقيق هدف ({goal}) ننصح باستخدام:</p>
+            <p style="margin: 5px 0; color: #2E8B57; font-size: 18px;">💊 {rec_supps}</p>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; font-size: 12px; color: #aaa;">
+            © 2026 First Nutrition System
+        </div>
+    </div>
+    """
     
-    st.markdown(report_html, unsafe_allow_html=True)
+    # هنا يتم تنفيذ كود HTML
+    st.markdown(html_content, unsafe_allow_html=True)
 
     # --- 7. زر الطباعة ---
     components.html(
