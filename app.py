@@ -1,5 +1,6 @@
 import streamlit as st
 import datetime
+import streamlit.components.v1 as components
 
 # --- إعدادات الصفحة ---
 st.set_page_config(
@@ -8,71 +9,96 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- كود التصميم (CSS) المعدل ---
+# --- كود التصميم الجذري (CSS) ---
 st.markdown("""
 <style>
-    /* 1. الاتجاه العام للصفحة: يمين لليسار */
+    /* 1. إعدادات الاتجاه العام */
     .stApp {
         direction: rtl;
+        text-align: right;
     }
 
-    /* 2. العناوين الرئيسية: بالنص (Center) لجمالية التصميم */
-    h1, h2, h3, h4, h5 {
+    /* 2. إخفاء العناصر غير المرغوبة عند الطباعة (الحل السحري) */
+    @media print {
+        /* إخفاء الزر نفسه */
+        .print-btn-container { display: none !important; }
+        /* إخفاء شريط أدوات Streamlit العلوي */
+        header { display: none !important; }
+        /* إخفاء الفوتر */
+        footer { display: none !important; }
+        /* إخفاء أي عناصر تحكم أخرى */
+        .stButton { display: none !important; }
+        
+        /* تحسين شكل التقرير عند الطباعة */
+        .report-box { border: 1px solid #2E8B57 !important; }
+    }
+
+    /* 3. تنسيق العناوين (تمركز) */
+    h1, h2, h3, h4 {
         text-align: center !important;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        color: #2E8B57; /* لون أخضر الهوية */
+        color: #2E8B57;
     }
 
-    /* 3. النصوص العادية وتسميات الخانات: يمين (Right) للقراءة الصحيحة */
+    /* 4. تنسيق النصوص التوضيحية (يمين) */
     p, label, .stTextInput label, .stNumberInput label, .stSelectbox label {
         text-align: right !important;
     }
-
-    /* 4. توسيط الشعار */
-    div[data-testid="stImage"] {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    div[data-testid="stImage"] img {
-        width: 180px !important;
-    }
-
-    /* 5. تنسيق زر الطباعة */
+    
+    /* 5. تنسيق زر الطباعة ليظهر بشكل جميل على الشاشة */
     .print-btn {
-        display: block;
-        margin: 20px auto;
         background-color: #2E8B57;
-        color: white; 
-        padding: 12px 25px;
+        color: white;
+        padding: 12px 24px;
         border: none;
         border-radius: 8px;
-        text-align: center;
+        font-size: 16px;
         font-weight: bold;
         cursor: pointer;
-        font-family: sans-serif;
+        transition: 0.3s;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .print-btn:hover {
         background-color: #1e5e3a;
+        transform: scale(1.02);
+    }
+    .print-btn-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        margin-bottom: 40px;
+    }
+    
+    /* 6. حاوية الشعار (توسيط إجباري) */
+    .logo-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .logo-container img {
+        width: 160px;
+        height: auto;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# --- الشعار والعنوان ---
-st.image("https://www.firstnutrition.com/wp-content/uploads/2026/01/logo.png")
-st.markdown("<h3>نظام تحليل الجسم الذكي</h3>", unsafe_allow_html=True)
+# --- عرض الشعار (HTML مباشر لضمان التوسيط) ---
+st.markdown("""
+    <div class="logo-container">
+        <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/logo.png">
+    </div>
+    <h3 style="text-align: center; margin-top: -10px;">نظام تحليل الجسم الذكي</h3>
+""", unsafe_allow_html=True)
 
-# --- حاوية إدخال البيانات ---
+# --- إدخال البيانات ---
 with st.container(border=True):
-    # العنوان الفرعي (سيظهر في الوسط الآن)
     st.markdown("#### 👤 بيانات العميل")
     
-    # الصف الأول
     c1, c2 = st.columns(2)
     with c1: name = st.text_input("الاسم الكريم", "زائر")
     with c2: gender = st.selectbox("الجنس", ["ذكر", "أنثى"])
 
-    # الصف الثاني
     c3, c4, c5 = st.columns(3)
     with c3: age = st.number_input("العمر", 10, 100, 30)
     with c4: weight_val = st.number_input("الوزن (kg)", 30.0, 200.0, 80.0)
@@ -81,7 +107,6 @@ with st.container(border=True):
     st.markdown("---")
     st.markdown("#### 🎯 النشاط والهدف")
     
-    # الصف الثالث
     c6, c7 = st.columns(2)
     with c6:
         activity_map = {
@@ -102,11 +127,10 @@ with st.container(border=True):
     st.write("") 
     calc_btn = st.button("تحليل البيانات وإصدار التقرير 📊", type="primary", use_container_width=True)
 
-# --- العمليات الحسابية والتقرير ---
+# --- الحسابات والتقرير ---
 if calc_btn:
-    # الحسابات
+    # المنطق الحسابي
     act_val = activity_map[activity]
-    
     if gender == "ذكر":
         bmr = (9.99 * weight_val) + (6.25 * height_val) - (5 * age) + 5
     else:
@@ -141,15 +165,17 @@ if calc_btn:
     st.markdown("---")
     st.success("✅ تم التحليل بنجاح!")
     
+    # حاوية التقرير
     with st.container(border=True):
-        col_r1, col_r2 = st.columns([1, 3])
-        with col_r1:
-             st.image("https://www.firstnutrition.com/wp-content/uploads/2026/01/logo.png", width=80)
-        with col_r2:
-            st.markdown(f"### تقرير: {name}")
-            st.markdown(f"**التاريخ:** {datetime.date.today()}")
-            
-        st.markdown("---")
+        # ترويسة التقرير (HTML لضمان التنسيق عند الطباعة)
+        st.markdown(f"""
+            <div style="text-align: center;">
+                <img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/logo.png" width="100">
+                <h3>تقرير الحالة الغذائية</h3>
+                <p><strong>العميل:</strong> {name} | <strong>التاريخ:</strong> {datetime.date.today()}</p>
+            </div>
+            <hr>
+        """, unsafe_allow_html=True)
 
         st.markdown("#### 1️⃣ ملخص الجسم")
         m1, m2, m3 = st.columns(3)
@@ -167,13 +193,16 @@ if calc_btn:
         st.markdown(f"لتحقيق هدفك **({goal})** ننصح باستخدام:")
         st.success(f"💊 **{rec_supps}**")
         
-        st.caption("First Nutrition Expert System ©")
+        st.caption("© 2026 First Nutrition Expert System")
 
-    st.components.v1.html(
+    # --- زر الطباعة (مخفي عند الطباعة) ---
+    components.html(
         """
-        <button onclick="window.print()" class="print-btn">
-            🖨️ طباعة التقرير / حفظ كـ PDF
-        </button>
-        """, 
-        height=80
+        <div class="print-btn-container">
+            <button onclick="window.print()" class="print-btn">
+                🖨️ طباعة التقرير / حفظ كـ PDF
+            </button>
+        </div>
+        """,
+        height=100
     )
