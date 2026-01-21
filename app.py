@@ -3,217 +3,133 @@ import datetime
 
 # --- إعدادات الصفحة ---
 st.set_page_config(
-    page_title="First Nutrition Expert",
-    page_icon="🍏",
+    page_title="First Nutrition Pro",
+    page_icon="💪",
     layout="centered"
 )
 
-# --- تنسيق التصميم (CSS) ---
+# --- تفعيل اللغة العربية (يمين لليسار) ---
 st.markdown("""
 <style>
-    /* استيراد خط تجوال العربي */
-    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
-    
-    .stApp { direction: rtl; text-align: right; font-family: 'Tajawal', sans-serif; }
-    
-    /* إخفاء العناصر عند الطباعة */
-    @media print {
-        .stButton, .stSelectbox, .stNumberInput, header, footer, .no-print { display: none !important; }
-        .report-container { border: none !important; box-shadow: none !important; }
+    .stApp {
+        direction: rtl;
+        text-align: right;
     }
-    
-    /* تصميم بطاقة التقرير */
-    .report-container {
-        background-color: white;
-        padding: 30px;
-        border-radius: 15px;
-        border: 2px solid #2E8B57;
-        margin-top: 20px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-    
-    .header-box { text-align: center; border-bottom: 2px solid #f0f0f0; padding-bottom: 15px; margin-bottom: 20px; }
-    .client-title { font-size: 22px; color: #2E8B57; font-weight: bold; margin: 10px 0; }
-    
-    /* صناديق الأرقام */
-    .stat-grid { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
-    .stat-box { 
-        flex: 1; 
-        background: #f8fff8; 
-        padding: 15px; 
-        border-radius: 10px; 
-        text-align: center; 
-        border: 1px solid #dcdcdc;
-    }
-    .stat-val { font-size: 20px; font-weight: bold; color: #2E8B57; display: block; }
-    .stat-label { font-size: 14px; color: #555; }
-    
-    /* الجداول */
-    .styled-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
-    .styled-table th { background-color: #2E8B57; color: white; padding: 10px; border: 1px solid #2E8B57; }
-    .styled-table td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-    
-    /* السوشيال ميديا */
-    .social-icons { display: flex; justify-content: center; gap: 15px; margin-top: 25px; }
-    .social-icons img { width: 35px; transition: 0.3s; }
-    .social-icons img:hover { transform: scale(1.1); }
+    /* تحسين شكل الجداول */
+    .stTable { width: 100% !important; }
 </style>
 """, unsafe_allow_html=True)
 
 # --- الشعار ---
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
+c1, c2, c3 = st.columns([1, 2, 1])
+with c2:
     st.image("https://www.firstnutrition.com/wp-content/uploads/2026/01/logo.png", use_container_width=True)
 
-st.markdown("<h3 style='text-align: center; color: #2E8B57;'>نظام تحليل الجسم والتغذية</h3>", unsafe_allow_html=True)
+st.title("نظام تحليل الجسم - First Nutrition")
 
-# --- قسم إدخال البيانات ---
-with st.expander("📝 إدخال بيانات العميل (اضغط هنا)", expanded=True):
-    c1, c2 = st.columns(2)
-    with c1:
-        title = st.selectbox("اللقب", ["السيد", "السيدة", "الكابتن", "الآنسة"])
-        name = st.text_input("الاسم", "زائر")
-    with c2:
+# --- 1. إدخال البيانات ---
+with st.expander("📝 بيانات العميل (اضغط للتعديل)", expanded=True):
+    col1, col2 = st.columns(2)
+    with col1:
+        name = st.text_input("اسم العميل", "زائر")
+    with col2:
         gender = st.selectbox("الجنس", ["ذكر", "أنثى"])
-        age = st.number_input("العمر", 10, 100, 30)
-
-    c3, c4 = st.columns(2)
-    with c3: weight = st.number_input("الوزن (KG)", 30.0, 200.0, 80.0)
-    with c4: height = st.number_input("الطول (CM)", 100.0, 250.0, 180.0)
-
-    activity_map = {"خامل (1.2)": 1.2, "نشاط خفيف (1.375)": 1.375, "نشاط متوسط (1.55)": 1.55, "نشيط جداً (1.725)": 1.725}
-    activity = st.selectbox("مستوى النشاط", list(activity_map.keys()))
     
-    goal_map = {"إنقاص الوزن": "loss", "محافظة": "maintain", "زيادة الوزن": "gain"}
-    goal = st.selectbox("الهدف", list(goal_map.keys()))
+    col3, col4, col5 = st.columns(3)
+    with col3: age = st.number_input("العمر", 10, 100, 30)
+    with col4: weight = st.number_input("الوزن (KG)", 30.0, 200.0, 80.0)
+    with col5: height = st.number_input("الطول (CM)", 100.0, 250.0, 180.0)
 
-    calculate = st.button("تحليل وإصدار التقرير 📊")
+    col6, col7 = st.columns(2)
+    with col6:
+        activity_map = {"خامل (1.2)": 1.2, "نشاط خفيف (1.375)": 1.375, "نشاط متوسط (1.55)": 1.55, "نشيط جداً (1.725)": 1.725}
+        activity = st.selectbox("مستوى النشاط", list(activity_map.keys()))
+    with col7:
+        goal_map = {"إنقاص الوزن": "loss", "محافظة": "maintain", "زيادة الوزن": "gain"}
+        goal = st.selectbox("الهدف", list(goal_map.keys()))
 
-# --- العمليات الحسابية ---
-if calculate:
-    # 1. BMR & TDEE
+    calc_btn = st.button("تحليل وإصدار التقرير 📊", type="primary")
+
+# --- منطق الحساب والنتيجة ---
+if calc_btn:
+    # الحسابات
     if gender == "ذكر":
         bmr = (9.99 * weight) + (6.25 * height) - (5 * age) + 5
     else:
         bmr = (9.99 * weight) + (6.25 * height) - (5 * age) - 161
-    
+        
     tdee = bmr * activity_map[activity]
     
-    # 2. BMI
+    # مؤشر الكتلة BMI
     bmi = weight / ((height/100) ** 2)
-    if bmi < 18.5: bmi_status, bmi_color = "نحافة", "#3498db"
-    elif 18.5 <= bmi < 24.9: bmi_status, bmi_color = "وزن مثالي ✅", "#2ecc71"
-    elif 25 <= bmi < 29.9: bmi_status, bmi_color = "زيادة وزن", "#f1c40f"
-    else: bmi_status, bmi_color = "سمنة ⚠️", "#e74c3c"
+    if bmi < 18.5: bmi_status = "نحافة 🔵"
+    elif 18.5 <= bmi < 24.9: bmi_status = "وزن مثالي ✅"
+    elif 25 <= bmi < 29.9: bmi_status = "زيادة وزن 🟡"
+    else: bmi_status = "سمنة 🔴"
 
-    # 3. الماء والسعرات
+    # الماء والسعرات
     water = (weight * 33) / 1000
-    
     target_cal = tdee
+    
     if goal_map[goal] == "loss":
         target_cal -= 500
-        macros = {"p": 0.40, "c": 0.30, "f": 0.30}
         rec_supps = "ISO-100, L-Carnitine, Multivitamin"
+        p_ratio, c_ratio, f_ratio = 0.40, 0.30, 0.30
     elif goal_map[goal] == "gain":
         target_cal += 500
-        macros = {"p": 0.30, "c": 0.50, "f": 0.20}
         rec_supps = "Mass Gainer, Creatine, Pre-Workout"
+        p_ratio, c_ratio, f_ratio = 0.30, 0.50, 0.20
     else:
-        macros = {"p": 0.30, "c": 0.40, "f": 0.30}
         rec_supps = "Whey Protein, Omega-3"
+        p_ratio, c_ratio, f_ratio = 0.30, 0.40, 0.30
 
-    p_g = int((target_cal * macros["p"]) / 4)
-    c_g = int((target_cal * macros["c"]) / 4)
-    f_g = int((target_cal * macros["f"]) / 9)
+    p_g = int((target_cal * p_ratio) / 4)
+    c_g = int((target_cal * c_ratio) / 4)
+    f_g = int((target_cal * f_ratio) / 9)
 
-    # --- عرض التقرير (HTML جاهز) ---
+    # --- عرض التقرير (أدوات أصلية - لا تخطئ أبداً) ---
     st.markdown("---")
     
-    html_report = f"""
-    <div class="report-container">
-        <div class="header-box">
-            <h3>First Nutrition Report</h3>
-            <p>التاريخ: {datetime.date.today()}</p>
-            <div class="client-title">العميل: {title} {name}</div>
-        </div>
-
-        <h4 style="color:#2E8B57;">1️⃣ مؤشرات الجسم (Body Stats)</h4>
-        <div class="stat-grid">
-            <div class="stat-box">
-                <span class="stat-label">مؤشر الكتلة (BMI)</span><br>
-                <span class="stat-val" style="color: {bmi_color};">{round(bmi, 1)}</span>
-                <small>{bmi_status}</small>
-            </div>
-            <div class="stat-box">
-                <span class="stat-label">الاحتياج اليومي</span><br>
-                <span class="stat-val">{int(target_cal)}</span>
-                <small>سعرة حرارية</small>
-            </div>
-            <div class="stat-box">
-                <span class="stat-label">احتياج الماء</span><br>
-                <span class="stat-val" style="color: #3498db;">{round(water, 1)}</span>
-                <small>لتر</small>
-            </div>
-        </div>
-
-        <h4 style="color:#2E8B57;">2️⃣ تقسيم الماكروز (Macros)</h4>
-        <div class="stat-grid">
-            <div class="stat-box" style="border-color: #ffcccc;">
-                🥩 بروتين<br><span class="stat-val">{p_g}g</span>
-            </div>
-            <div class="stat-box" style="border-color: #ffffcc;">
-                🍞 كارب<br><span class="stat-val">{c_g}g</span>
-            </div>
-            <div class="stat-box" style="border-color: #ccffcc;">
-                🥑 دهون<br><span class="stat-val">{f_g}g</span>
-            </div>
-        </div>
-
-        <h4 style="color:#2E8B57;">3️⃣ التوصيات والمصادر</h4>
-        <table class="styled-table">
-            <tr>
-                <th>العنصر</th>
-                <th>مصادر طبيعية مقترحة</th>
-                <th>مكملات First Nutrition</th>
-            </tr>
-            <tr>
-                <td><b>البروتين</b></td>
-                <td>دجاج، سمك، لحم، بيض</td>
-                <td>{rec_supps.split(',')[0]}</td>
-            </tr>
-            <tr>
-                <td><b>الكاربوهيدرات</b></td>
-                <td>أرز، بطاطا، شوفان، فواكه</td>
-                <td>Vitargo / Carb Powder</td>
-            </tr>
-            <tr>
-                <td><b>الدهون</b></td>
-                <td>زيت زيتون، مكسرات، أفوكادو</td>
-                <td>Omega-3</td>
-            </tr>
-        </table>
+    # عنوان التقرير داخل إطار
+    with st.container(border=True):
+        st.header(f"📋 تقرير الحالة الغذائية: {name}")
+        st.caption(f"التاريخ: {datetime.date.today()}")
         
-        <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px;">
-            <b>💊 التوصية الخاصة:</b> ننصح باستخدام المجموعة التالية لتحقيق هدفك:<br>
-            <span style="color: #d35400; font-weight: bold;">{rec_supps}</span>
-        </div>
+        # الصف الأول: المؤشرات الرئيسية
+        st.subheader("1️⃣ مؤشرات الجسم")
+        m1, m2, m3 = st.columns(3)
+        m1.metric("مؤشر الكتلة (BMI)", f"{bmi:.1f}", bmi_status)
+        m2.metric("الاحتياج اليومي", f"{int(target_cal)} سعرة")
+        m3.metric("احتياج الماء", f"{water:.1f} لتر", "يومياً")
+        
+        st.markdown("---")
+        
+        # الصف الثاني: الماكروز
+        st.subheader("2️⃣ توزيع السعرات (الماكروز)")
+        c1, c2, c3 = st.columns(3)
+        c1.info(f"🥩 **بروتين:**\n\n {p_g} جرام")
+        c2.warning(f"🍞 **كارب:**\n\n {c_g} جرام")
+        c3.error(f"🥑 **دهون:**\n\n {f_g} جرام")
+        
+        st.markdown("---")
+        
+        # الصف الثالث: التوصيات
+        st.subheader("3️⃣ التوصيات والمكملات")
+        st.success(f"💡 لتحقيق هدفك ({goal}) ننصح باستخدام باقة: **{rec_supps}**")
+        
+        # جدول المصادر
+        st.markdown("**جدول مصادر مقترحة:**")
+        st.table({
+            "العنصر": ["البروتين", "الكاربوهيدرات", "الدهون الصحية"],
+            "أمثلة من الطعام": ["دجاج، سمك، بيض", "أرز، شوفان، بطاطا", "زيت زيتون، مكسرات"],
+            "مكملات First Nutrition": [rec_supps.split(',')[0], "Carb Powder / Vitargo", "Omega-3"]
+        })
+        
+        st.caption("© First Nutrition Expert System")
 
-        <hr style="margin-top: 30px;">
-        <div style="text-align: center; font-size: 12px; color: #777;">
-            © 2026 First Nutrition - Expert System
-        </div>
-    </div>
-    """
-    
-    st.markdown(html_report, unsafe_allow_html=True)
-    st.success("✅ تم إصدار التقرير بنجاح! يمكنك طباعته الآن (Ctrl+P).")
-
-# --- الفوتر ---
+# --- تذييل الصفحة ---
 st.markdown("---")
-st.markdown("""
-<div class="social-icons">
-    <a href="https://www.facebook.com/firstnutritionjordan/" target="_blank"><img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/firstnutritionjordan-1-FB-.png"></a>
-    <a href="https://www.instagram.com/firstnutritionjo/" target="_blank"><img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/firstnutritionjordan-2-INSTA.png"></a>
-    <a href="https://www.firstnutrition.com" target="_blank"><img src="https://www.firstnutrition.com/wp-content/uploads/2026/01/firstnutritionjordan-5-WEB-1.png"></a>
-</div>
-""", unsafe_allow_html=True)
+col_s1, col_s2, col_s3 = st.columns(3)
+with col_s1: st.link_button("🌐 الموقع الرسمي", "https://www.firstnutrition.com")
+with col_s2: st.link_button("📸 انستقرام", "https://www.instagram.com/firstnutritionjo/")
+with col_s3: st.link_button("📘 فيسبوك", "https://www.facebook.com/firstnutritionjordan/")
